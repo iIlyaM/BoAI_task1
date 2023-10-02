@@ -9,6 +9,8 @@ from sklearn.manifold import MDS
 def main():
     data = pd.read_csv('files/customers.csv', delimiter=';')
 
+
+
     distance_matrix = linkage(data, method='ward', metric='euclidean')
     plt.figure(figsize=(10, 5))
     dendrogram(distance_matrix, p=3, truncate_mode='level')
@@ -24,29 +26,29 @@ def main():
 
     plt.figure(figsize=(10, 5))
     plt.scatter(X_mds[:, 0], X_mds[:, 1], c=labels)
+    plt.title('Многомерное шкалирование')
     plt.show()
 
-    wcss = []  # Within-Cluster-Sum-of-Squares
+    sums = []
 
-    for i in range(1, 11):  # Пробуем разное количество кластеров
-        kmeans = KMeans(n_clusters=i, init='k-means++', max_iter=300, n_init=10, random_state=0)
+    for i in range(1, 11):
+        kmeans = KMeans(n_clusters=i, random_state=0)
         kmeans.fit(data)
-        wcss.append(kmeans.inertia_)
+        sums.append(kmeans.inertia_)
 
-    # Выведем график "каменистая осыпь"
     plt.figure(figsize=(10, 5))
-    plt.plot(range(1, 11), wcss, marker='o', linestyle='--')
+    plt.plot(range(1, 11), sums, marker='o', linestyle='--')
     plt.title('График "каменистая осыпь"')
     plt.xlabel('Количество кластеров')
-    plt.ylabel('Сумма квадратов внутри кластера')
+    plt.ylabel('Сумма квадратов расстояний')
     plt.show()
 
-    kmeans = KMeans(n_clusters=2, init='k-means++', random_state=0)
+    kmeans = KMeans(n_clusters=2, random_state=0)
     kmeans.fit(data)
     data['cluster'] = kmeans.labels_
 
-    # Средние значения переменных для каждого кластера
     print(data.groupby('cluster').mean())
+    print(data.groupby('cluster').size())
 
 
 if __name__ == '__main__':
